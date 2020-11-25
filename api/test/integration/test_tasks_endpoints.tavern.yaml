@@ -1,0 +1,97 @@
+---
+test_name: PUT /agents/upgrade
+
+marks:
+  - base_tests
+
+stages:
+
+  - name: Generate two task IDs
+    request:
+      verify: False
+      url: "{protocol:s}://{host:s}:{port:d}/agents/upgrade"
+      method: PUT
+      headers:
+        Authorization: "Bearer {test_login_token}"
+      params:
+        agents_list: 001,002
+        wpk_repo: packages.wazuh.com/wpk/
+        version: 3.13.1
+        force: true
+    response:
+      status_code: 200
+
+---
+test_name: GET /tasks/status
+
+stages:
+
+  - name: Missing task IDs
+    request: &get_status
+      verify: False
+      url: "{protocol:s}://{host:s}:{port:d}/tasks/status"
+      method: GET
+      headers:
+        Authorization: "Bearer {test_login_token}"
+    response:
+      status_code: 400
+      json:
+        detail: !anystr
+        title: !anystr
+
+  - name: Get no-existent tasks's status
+    request:
+      verify: False
+      <<: *get_status
+      params:
+        tasks_list: 99,100
+    response:
+      status_code: 200
+      json:
+        error: 1
+        data:
+          affected_items: [ ]
+          total_affected_items: 0
+          total_failed_items: 2
+          failed_items:
+            - error:
+                code: 1858
+                message: !anystr
+                remediation: !anything
+              id:
+                - '99'
+                - '100'
+        message: !anystr
+
+  - name: Get existent tasks's status
+    request:
+      verify: False
+      <<: *get_status
+      params:
+        tasks_list: 1,2
+    response:
+      status_code: 200
+      json:
+        error: 0
+        data:
+          affected_items:
+            - message: Success
+              agent: !anyint
+              task_id: 1
+              module: upgrade_module
+              command: upgrade
+              status: !anystr
+              create_time: !anystr
+              update_time: !anystr
+            - message: Success
+              agent: !anyint
+              task_id: 2
+              module: upgrade_module
+              command: upgrade
+              status: !anystr
+              create_time: !anystr
+              update_time: !anystr
+          total_affected_items: 2
+          total_failed_items: 0
+          failed_items: []
+        message: !anystr

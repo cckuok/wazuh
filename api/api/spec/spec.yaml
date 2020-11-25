@@ -491,6 +491,14 @@ x-rbac-catalog:
         actions: ['syscollector:read']
         resources: ['agent:id:*']
         effect: "allow"
+    'tasks:status':
+      description: "Access tasks's status information"
+      resources:
+        - $ref: '#/x-rbac-catalog/resources/*:*'
+      example:
+        actions: ['tasks:status']
+        resources: ['*:*:*']
+        effect: "deny"
 
 components:
   responses:
@@ -3931,6 +3939,15 @@ components:
         type: array
         items:
           type: string
+    tasks_list:
+      in: query
+      name: tasks_list
+      description: "List of task IDs (separated by comma)"
+      required: true
+      schema:
+        type: array
+        items:
+          type: integer
     manager_host:
       in: query
       name: manager
@@ -15357,6 +15374,52 @@ paths:
                 type: object
               example:
                 message: 'Configuration successfully updated'
+                error: 0
+        '400':
+          $ref: '#/components/responses/ResponseError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/InvalidHTTPMethodResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+
+  /tasks/status:
+    get:
+      tags:
+        - tasks
+      summary: "List tasks"
+      description: "Returns all available information about the specified tasks"
+      operationId: api.controllers.tasks_controller.get_tasks_status
+      x-rbac-actions:
+        - $ref: '#/x-rbac-catalog/actions/tasks:status'
+      parameters:
+        - $ref: '#/components/parameters/pretty'
+        - $ref: '#/components/parameters/wait_for_complete'
+        - $ref: '#/components/parameters/tasks_list'
+      responses:
+        '200':
+          description: "Tasks's status"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                data:
+                  affected_items:
+                    - message: Success
+                      agent: 2
+                      task_id: 1
+                      node: worker2
+                      module: upgrade_module
+                      command: upgrade
+                      status: In progress
+                      create_time: 2020/11/10 11:55:33
+                      update_time: 2020/11/10 11:55:36
+                  total_affected_items: 1
+                  total_failed_items: 0
+                  failed_items: [ ]
+                message: All specified task's status were returned
                 error: 0
         '400':
           $ref: '#/components/responses/ResponseError'
