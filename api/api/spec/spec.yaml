@@ -3492,6 +3492,12 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/AgentID'
+    agent_id_no_required:
+      in: query
+      name: agent_id
+      description: "Agent ID. All possible values from 000 onwards"
+      schema:
+        $ref: '#/components/schemas/AgentID'
     agent_name:
       in: query
       name: agent_name
@@ -3931,6 +3937,13 @@ components:
         type: array
         items:
           $ref: '#/components/schemas/GroupID_DELETE'
+    node:
+      in: query
+      name: node
+      description: "Show results filtered by node"
+      schema:
+        type: string
+        format: alphanumeric
     nodes_list:
       in: query
       name: nodes_list
@@ -3939,15 +3952,13 @@ components:
         type: array
         items:
           type: string
-    tasks_list:
+    module:
       in: query
-      name: tasks_list
-      description: "List of task IDs (separated by comma)"
-      required: true
+      name: module
+      description: "Show results filtered by module"
       schema:
-        type: array
-        items:
-          type: integer
+        type: string
+        format: alphanumeric
     manager_host:
       in: query
       name: manager
@@ -4225,9 +4236,9 @@ components:
       schema:
         type: integer
         minimum: 0
-    task_ids:
+    task_list:
       in: query
-      name: 'task_ids'
+      name: 'task_list'
       description: "List of task IDs (separated by comma)"
       schema:
         type: array
@@ -15396,7 +15407,18 @@ paths:
       parameters:
         - $ref: '#/components/parameters/pretty'
         - $ref: '#/components/parameters/wait_for_complete'
-        - $ref: '#/components/parameters/tasks_list'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/query'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/agent_id_no_required'
+        - $ref: '#/components/parameters/task_list'
+        - $ref: '#/components/parameters/command'
+        - $ref: '#/components/parameters/node'
+        - $ref: '#/components/parameters/module'
+        - $ref: '#/components/parameters/status'
       responses:
         '200':
           description: "Tasks's status"

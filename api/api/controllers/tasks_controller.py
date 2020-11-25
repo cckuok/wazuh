@@ -7,20 +7,23 @@ import logging
 from aiohttp import web
 
 from api.encoder import dumps, prettify
-from api.util import remove_nones_to_dict, raise_if_exc
+from api.util import remove_nones_to_dict, parse_api_param, raise_if_exc
 from wazuh.core.cluster.dapi.dapi import DistributedAPI
+from wazuh.core.common import database_limit
 from wazuh.tasks import get_task_status
 
 logger = logging.getLogger('wazuh')
 
 
-async def get_tasks_status(request, tasks_list=None, pretty=False, wait_for_complete=False):
+async def get_tasks_status(request, pretty=False, wait_for_complete=False, offset=0, limit=database_limit,
+                           task_list=None, agent_id=None, command=None, node=None, module=None, status=None, q=None,
+                           search=None, select=None, sort=None):
     """Check the status of the specified tasks
 
     Parameters
     ----------
     request
-    tasks_list : list
+    task_list : list
         List of task's IDs
     pretty : bool, optional
         Show results in human-readable format
@@ -31,7 +34,12 @@ async def get_tasks_status(request, tasks_list=None, pretty=False, wait_for_comp
     -------
     Tasks's status
     """
-    f_kwargs = {'task_list': tasks_list}
+    f_kwargs = {'task_list': task_list, 'agent_id': agent_id,
+                'command': command, 'node': node, 'module': module, 'status': status,
+                'select': select, 'search': parse_api_param(search, 'search'),
+                'offset': offset, 'limit': limit,
+                'sort': parse_api_param(sort, 'sort'), 'q': q
+                }
 
     dapi = DistributedAPI(f=get_task_status,
                           f_kwargs=remove_nones_to_dict(f_kwargs),

@@ -60,7 +60,7 @@ class WazuhDBConnection:
         else:
             input_val_errors = [
                 (query_elements[sql_first_index] == 'sql', "Incorrect WDB request type."),
-                (query_elements[0] == 'agent' or query_elements[0] == 'global',
+                (query_elements[0] == 'agent' or query_elements[0] == 'global' or query_elements[0] == 'task',
                  "The {} database is not valid".format(query_elements[0])),
                 (query_elements[1].isdigit() if query_elements[0] == 'agent' else True,
                  "Incorrect agent ID {}".format(query_elements[1])),
