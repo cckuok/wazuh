@@ -92,7 +92,7 @@ def test_get_attack(mock_wdb, offset, limit):
         else:
             raise e
 
-    # check result lenght
+    # check result length
     try:
         assert len(result.affected_items) == limit
     except AssertionError:
